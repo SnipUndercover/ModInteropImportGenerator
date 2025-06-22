@@ -7,12 +7,19 @@ namespace ModInteropImportGenerator;
 ///   Generate ModInterop fields based on the method names and signatures.
 /// </summary>
 /// <param name="modInteropName">
-///   The export name, sourced from the exporting mod's ModExportNameAttribute.
+///   The ModExportName from which to import.
 /// </param>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 public class GenerateImportsAttribute(string modInteropName) : Attribute
 {
+    /// <summary>
+    ///   The ModExportName from which to import.
+    /// </summary>
     public string ModInteropName { get; } = modInteropName;
 
+    /// <summary>
+    ///   Whether this import is a required dependency, and should crash the game
+    ///   if the import did not load successfully.
+    /// </summary>
     public bool RequiredDependency { get; set; } = false;
 }
