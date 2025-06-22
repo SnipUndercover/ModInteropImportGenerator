@@ -8,6 +8,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ModInteropImportGenerator;
 
+// TODO: maybe write the imported fields into another class to not clutter the member-space?
+
 public class SimpleSourceGenerator
 {
     private readonly List<string> Usings = [];
