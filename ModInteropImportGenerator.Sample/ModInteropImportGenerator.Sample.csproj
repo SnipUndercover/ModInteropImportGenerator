@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <RootNamespace>ModInteropImportGenerator.Sample</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\ModInteropImportGenerator\ModInteropImportGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="DDD.UbiquitousLanguageRegistry.txt"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="JetBrains.Annotations" Version="2024.3.0" />
+      <PackageReference Include="MonoMod.Utils" Version="25.0.8" />
+    </ItemGroup>
+
+</Project>
