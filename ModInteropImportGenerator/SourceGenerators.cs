@@ -159,6 +159,6 @@ internal static class SourceGenerators
     {
         const string ImportNameIdentifier = $"{GeneratedModImportClassName}.ImportName";
 
-        return $$"""throw new InvalidOperationException($"Mod import for \"{{{ImportNameIdentifier}}}\" has not been loaded, or \"{{{ImportNameIdentifier}}}.{nameof({{method.Name}})}\" does not exist.");""";
+        return $$"""throw new InvalidOperationException($"One or more definitions for \"{{{ImportNameIdentifier}}}.{nameof({{method.Name}})}\" did not load correctly. Check the import name and imported method definitions.");""";
     }
 }
