@@ -135,22 +135,31 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
 
             SimpleSourceGenerator sourceGen = new(classDeclaration, compilation, importMeta);
 
-            sourceGen.AddUsings("System", "System.Diagnostics", "MonoMod.ModInterop");
-
-            sourceGen.WriteLine($"private const string ImportName = \"{importMeta.ImportName}\";");
-
-            List<IMethodSymbol> methodsToGenerate = classSymbol.GetMembers()
+            List<IMethodSymbol> methodsToImport = classSymbol.GetMembers()
                 .OfType<IMethodSymbol>()
                 .Where(m => m.IsPartialDefinition && m.PartialImplementationPart is null)
                 .ToList();
 
-            foreach (IMethodSymbol method in methodsToGenerate)
-            {
-                sourceGen.WriteLine();
-                GenerationHelpers.GenerateMethodImplementation(sourceGen, method);
-            }
+            sourceGen.AddUsings("System", "System.Diagnostics", "MonoMod.ModInterop");
 
-            GenerationHelpers.GenerateLoadMethod(sourceGen, methodsToGenerate);
+            sourceGen.WriteLine($"public static partial class {sourceGen.ClassName}");
+            using (sourceGen.UseCodeBlock())
+            {
+                SourceGenerators.GenerateMethodImplementations(sourceGen, methodsToImport);
+                sourceGen.WriteLine();
+                SourceGenerators.GenerateLoadMethod(sourceGen, methodsToImport);
+            }
+            sourceGen.WriteLine();
+
+            sourceGen.WriteLine($"[ModImportName({SourceGenerators.GeneratedModImportClassName}.ImportName)]");
+            sourceGen.WriteLine($"file class {SourceGenerators.GeneratedModImportClassName}");
+            using (sourceGen.UseCodeBlock())
+            {
+                sourceGen.WriteLine($"public const string ImportName = \"{importMeta.ImportName}\";");
+                sourceGen.WriteLine();
+
+                SourceGenerators.GenerateImportFields(sourceGen, methodsToImport);
+            }
 
             // add the source code to the compilation
             context.AddSource($"{sourceGen.ClassName}.g.cs", SourceText.From(sourceGen.Generate(), Encoding.UTF8));
