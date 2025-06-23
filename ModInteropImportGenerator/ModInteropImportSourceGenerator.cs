@@ -8,6 +8,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using ModInteropImportGenerator.Helpers;
 
 namespace ModInteropImportGenerator;
 
@@ -53,8 +54,7 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
     private static (ClassDeclarationSyntax classDeclaration, ModImportMetadata importMeta)
         GetClassDeclarationForSourceGen(GeneratorAttributeSyntaxContext context)
     {
-        // we already know this is a ClassDeclarationSyntax from the filter in Initialize
-        // so this cast is safe
+        // we already know this is a ClassDeclarationSyntax since this attribute can only be added to types
         var classDeclaration = (ClassDeclarationSyntax)context.TargetNode;
 
         Debug.WriteLine($"Checking declaration of class \"{classDeclaration.Identifier.Text}\"...");
@@ -133,6 +133,7 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
             if (model.GetDeclaredSymbol(classDeclaration) is not INamedTypeSymbol classSymbol)
                 continue;
 
+            MethodHelpers.ClearGeneratedNameCache();
             SimpleSourceGenerator sourceGen = new(classDeclaration, compilation, importMeta);
 
             List<IMethodSymbol> methodsToImport = classSymbol.GetMembers()

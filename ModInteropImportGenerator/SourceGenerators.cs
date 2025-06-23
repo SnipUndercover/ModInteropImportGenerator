@@ -30,7 +30,9 @@ internal static class SourceGenerators
         SimpleSourceGenerator sourceGen,
         IMethodSymbol method)
     {
-        sourceGen.WriteLine($"if ({GeneratedModImportClassName}.{method.Name} is null)");
+        string fieldName = method.GetGeneratedImportFieldName();
+
+        sourceGen.WriteLine($"if ({GeneratedModImportClassName}.{fieldName} is null)");
         using (sourceGen.UseIndent())
             sourceGen.WriteLine(GenerateInvalidModInteropException(method));
     }
@@ -76,9 +78,10 @@ internal static class SourceGenerators
         IMethodSymbol method)
     {
         using var _ = sourceGen.UseIndent();
+        string fieldName = method.GetGeneratedImportFieldName();
         IEnumerable<string> parameterReferences = method.GetParameterReferences();
 
-        sourceGen.WriteLine($"=> {GeneratedModImportClassName}.{method.Name}({string.Join(", ", parameterReferences)});");
+        sourceGen.WriteLine($"=> {GeneratedModImportClassName}.{fieldName}({string.Join(", ", parameterReferences)});");
     }
 
     private static void GenerateOptionalMethodImplementation(
@@ -86,9 +89,10 @@ internal static class SourceGenerators
         IMethodSymbol method)
     {
         using var _ = sourceGen.UseIndent();
+        string fieldName = method.GetGeneratedImportFieldName();
         IEnumerable<string> parameterReferences = method.GetParameterReferences();
 
-        sourceGen.Write($"=> {GeneratedModImportClassName}.{method.Name}?.Invoke({string.Join(", ", parameterReferences)})");
+        sourceGen.Write($"=> {GeneratedModImportClassName}.{fieldName}?.Invoke({string.Join(", ", parameterReferences)})");
         if (method.ReturnsVoid)
         {
             sourceGen.WriteLine(';');
@@ -134,7 +138,7 @@ internal static class SourceGenerators
         foreach (IParameterSymbol parameter in method.Parameters)
             sourceGen.TryAddUsingFor(parameter.Type);
 
-        string delegateName = method.GetGeneratedDelegateName();
+        string delegateName = method.GetGeneratedImportDelegateName();
         string returnType = method.GetReturnTypeName();
         IEnumerable<string> parameterDefinitions = method.GetParameterDefinitions();
 
@@ -145,9 +149,10 @@ internal static class SourceGenerators
         SimpleSourceGenerator sourceGen,
         IMethodSymbol method)
     {
-        string delegateName = method.GetGeneratedDelegateName();
+        string delegateName = method.GetGeneratedImportDelegateName();
+        string fieldName = method.GetGeneratedImportFieldName();
 
-        sourceGen.WriteLine($"public static {delegateName} {method.Name};");
+        sourceGen.WriteLine($"public static {delegateName} {fieldName};");
     }
 
     internal static string GenerateInvalidModInteropException(IMethodSymbol method)
