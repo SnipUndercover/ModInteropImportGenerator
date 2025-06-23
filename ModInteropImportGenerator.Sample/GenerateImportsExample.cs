@@ -1,4 +1,6 @@
-﻿namespace ModInteropImportGenerator.Sample;
+﻿using ModInteropImportGenerator.Sample.Stubs;
+
+namespace ModInteropImportGenerator.Sample;
 
 [GenerateImports("XYZ", RequiredDependency = true)]
 public static partial class GenerateImportsExample

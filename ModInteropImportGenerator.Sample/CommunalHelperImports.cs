@@ -1,4 +1,5 @@
 using System;
+using ModInteropImportGenerator.Sample.Stubs;
 
 namespace ModInteropImportGenerator.Sample;
 
