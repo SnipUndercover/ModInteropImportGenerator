@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,8 +7,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ModInteropImportGenerator;
-
-// TODO: maybe write the imported fields into another class to not clutter the member-space?
 
 public class SimpleSourceGenerator
 {
