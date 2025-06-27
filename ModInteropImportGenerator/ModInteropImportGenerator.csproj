@@ -19,12 +19,6 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-    </ItemGroup>
-    
-    <ItemGroup>
-        <!-- keep it in so that we can reference it using stuff like nameof, etc -->
-        <!-- <Compile Remove="ExportedTypes/GenerateImportsAttribute.cs" />-->
-        <EmbeddedResource Include="ExportedTypes/GenerateImportsAttribute.cs" LogicalName="GenerateImportsAttribute.cs" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
     </ItemGroup>
 
