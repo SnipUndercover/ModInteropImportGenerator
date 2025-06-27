@@ -205,8 +205,12 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
             {
                 sourceGen.WriteLine($"public const string ImportName = \"{importMeta.ImportName}\";");
                 sourceGen.WriteLine();
-
+                sourceGen.WriteLine("// Fields are initialized by ModInterop");
+                sourceGen.WriteLine("#pragma warning disable CS0649 // Field is never assigned to, and will always have its default value");
+                sourceGen.WriteLine();
                 SourceGenerators.GenerateImportFields(sourceGen, methodsToImport);
+                sourceGen.WriteLine();
+                sourceGen.WriteLine("#pragma warning restore CS0649 // Field is never assigned to, and will always have its default value");
             }
 
             // add the source code to the compilation
