@@ -1,13 +1,7 @@
 ﻿namespace ModInteropImportGenerator;
 
-public readonly record struct ModImportMetadata
+public readonly record struct ModImportMetadata(string ImportName, bool RequiredDependency)
 {
-    public ModImportMetadata(string importName, bool requiredDependency)
-    {
-        ImportName = importName;
-        RequiredDependency = requiredDependency;
-    }
-
-    public readonly string ImportName;
-    public readonly bool RequiredDependency;
+    public readonly string ImportName = ImportName;
+    public readonly bool RequiredDependency = RequiredDependency;
 }

@@ -63,10 +63,11 @@ internal static class SourceGenerators
         foreach (IParameterSymbol parameter in method.Parameters)
             sourceGen.TryAddUsingFor(parameter.Type);
 
-        string returnType = method.GetReturnTypeName();
+        string returnType = method.GetReturnType();
         IEnumerable<string> parameterDefinitions = method.GetParameterDefinitions();
 
-        sourceGen.WriteLine($"public static partial {returnType} {method.Name}({string.Join(", ", parameterDefinitions)})");
+        sourceGen.WriteLine(
+            $"public static partial {returnType} {method.Name}({string.Join(", ", parameterDefinitions)})");
         if (sourceGen.ImportMeta.RequiredDependency)
             GenerateRequiredMethodImplementation(sourceGen, method);
         else
@@ -88,11 +89,22 @@ internal static class SourceGenerators
         SimpleSourceGenerator sourceGen,
         IMethodSymbol method)
     {
+        if (method.HasOutParameters())
+            GenerateOptionalMethodImplementationWithOutParams(sourceGen, method);
+        else
+            GenerateOptionalMethodImplementationWithoutOutParams(sourceGen, method);
+    }
+
+    private static void GenerateOptionalMethodImplementationWithoutOutParams(
+        SimpleSourceGenerator sourceGen,
+        IMethodSymbol method)
+    {
         using var _ = sourceGen.UseIndent();
         string fieldName = method.GetGeneratedImportFieldName();
         IEnumerable<string> parameterReferences = method.GetParameterReferences();
 
-        sourceGen.Write($"=> {GeneratedModImportClassName}.{fieldName}?.Invoke({string.Join(", ", parameterReferences)})");
+        sourceGen.Write(
+            $"=> {GeneratedModImportClassName}.{fieldName}?.Invoke({string.Join(", ", parameterReferences)})");
         if (method.ReturnsVoid)
         {
             sourceGen.WriteLine(';');
@@ -100,8 +112,44 @@ internal static class SourceGenerators
         }
         sourceGen.WriteLine();
 
-        using var __ = sourceGen.UseIndent();
-        sourceGen.WriteLine($"?? default({method.GetReturnTypeName()});");
+        using (sourceGen.UseIndent())
+            sourceGen.WriteLine($"?? default({method.GetReturnType()});");
+    }
+
+    private static void GenerateOptionalMethodImplementationWithOutParams(
+        SimpleSourceGenerator sourceGen,
+        IMethodSymbol method)
+    {
+        using var _ = sourceGen.UseCodeBlock();
+        string fieldName = method.GetGeneratedImportFieldName();
+        IEnumerable<string> parameterReferences = method.GetParameterReferences();
+        bool returnsVoid = method.ReturnsVoid;
+
+        string importReference = $"{GeneratedModImportClassName}.{fieldName}";
+        string invocation = $"{importReference}({string.Join(", ", parameterReferences)})";
+
+        sourceGen.WriteLine($"if ({importReference} is not null)");
+        if (!returnsVoid)
+            using (sourceGen.UseIndent())
+                sourceGen.WriteLine($"return {invocation};");
+        else
+            using (sourceGen.UseCodeBlock())
+            {
+                sourceGen.WriteLine($"{invocation};");
+                sourceGen.WriteLine("return;");
+            }
+
+        sourceGen.WriteLine();
+        foreach (IParameterSymbol outParameter in method.GetOutParameters())
+            sourceGen.WriteLine($"{outParameter.Name} = default({
+                outParameter.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)
+            });");
+
+        if (returnsVoid)
+            return;
+
+        sourceGen.WriteLine();
+        sourceGen.WriteLine($"return default({method.GetReturnType()});");
     }
 
     internal static void GenerateImportFields(
@@ -139,7 +187,7 @@ internal static class SourceGenerators
             sourceGen.TryAddUsingFor(parameter.Type);
 
         string delegateName = method.GetGeneratedImportDelegateName();
-        string returnType = method.GetReturnTypeName();
+        string returnType = method.GetReturnType();
         IEnumerable<string> parameterDefinitions = method.GetParameterDefinitions();
 
         sourceGen.WriteLine($"public delegate {returnType} {delegateName}({string.Join(", ", parameterDefinitions)});");
@@ -159,6 +207,10 @@ internal static class SourceGenerators
     {
         const string ImportNameIdentifier = $"{GeneratedModImportClassName}.ImportName";
 
-        return $$"""throw new InvalidOperationException($"One or more definitions for \"{{{ImportNameIdentifier}}}.{nameof({{method.Name}})}\" did not load correctly. Check the import name and imported method definitions.");""";
+        return $$"""throw new InvalidOperationException($"One or more definitions for \"{{{
+            ImportNameIdentifier
+        }}}.{nameof({{
+            method.Name
+        }})}\" did not load correctly. Check the import name and imported method definitions.");""";
     }
 }
