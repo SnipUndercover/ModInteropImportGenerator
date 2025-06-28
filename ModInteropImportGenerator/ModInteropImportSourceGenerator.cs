@@ -88,6 +88,8 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
             .Where(t => t.importMeta is not null)
             .Select((t, _) => (t.classDeclaration, importMeta: t.importMeta!.Value));
 
+        // TODO: probably also return the method definition syntax nodes
+
         // register the source code generator
         context.RegisterSourceOutput(
             context.CompilationProvider.Combine(provider.Collect()),
