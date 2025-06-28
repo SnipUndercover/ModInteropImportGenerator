@@ -84,12 +84,14 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName(
             GenerateImportsAttributeFqn,
             static (node, _) => node is ClassDeclarationSyntax, // we can return `true` here but let's be sure
-            static (syntaxContext, _) => GetClassDeclarationForSourceGen(syntaxContext));
+            static (syntaxContext, _) => GetClassDeclarationForSourceGen(syntaxContext))
+            .Where(t => t.importMeta is not null)
+            .Select((t, _) => (t.classDeclaration, importMeta: t.importMeta!.Value));
 
         // register the source code generator
         context.RegisterSourceOutput(
             context.CompilationProvider.Combine(provider.Collect()),
-            ((ctx, t) => GenerateCode(ctx, t.Left, t.Right)));
+            (ctx, t) => GenerateCode(ctx, t.Left, t.Right));
     }
 
     /// <summary>
@@ -98,7 +100,7 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
     /// </summary>
     /// <param name="context">Syntax context, based on CreateSyntaxProvider predicate</param>
     /// <returns>The specific cast and whether the attribute was found.</returns>
-    private static (ClassDeclarationSyntax classDeclaration, ModImportMetadata importMeta)
+    private static (ClassDeclarationSyntax classDeclaration, ModImportMetadata? importMeta)
         GetClassDeclarationForSourceGen(GeneratorAttributeSyntaxContext context)
     {
         // we already know this is a ClassDeclarationSyntax since this attribute can only be added to types
@@ -106,63 +108,61 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
 
         Debug.WriteLine($"Checking declaration of class \"{classDeclaration.Identifier.Text}\"...");
 
-        foreach (AttributeData attribute in context.Attributes)
+        AttributeData? attribute = context.Attributes
+            .FirstOrDefault(attr => attr.AttributeClass?.ToDisplayString() == GenerateImportsAttributeFqn);
+
+        if (attribute is null)
+            throw new InvalidOperationException($"Cannot find \"{GenerateImportsAttributeFqn}\" attribute!");
+        Debug.WriteLine($"Found attribute \"{GenerateImportsAttributeFqn}\".");
+
+        (ClassDeclarationSyntax classDeclaration, ModImportMetadata? importMeta) failedDeclaration
+            = (classDeclaration, null);
+
+        var ctorArgs = attribute.ConstructorArguments;
+        if (ctorArgs.Length < 1)
         {
-            var attributeName = attribute.AttributeClass?.ToDisplayString();
-            if (attributeName != GenerateImportsAttributeFqn)
-            {
-                Debug.WriteLine($"Skipping attribute \"{attributeName}\".");
-                continue;
-            }
-            Debug.WriteLine($"Found attribute \"{GenerateImportsAttributeFqn}\".");
-
-            var ctorArgs = attribute.ConstructorArguments;
-            if (ctorArgs.Length < 1)
-            {
-                Debug.WriteLine("Constructor argument count is less than 1, skipping.");
-                continue;
-            }
-
-            var modImportNameArgument = ctorArgs[0];
-            if (modImportNameArgument.Kind == TypedConstantKind.Error)
-            {
-                Debug.WriteLine("Import name argument is in error, skipping.");
-                continue;
-            }
-
-            if (modImportNameArgument.Value is not string modImportName)
-            {
-                Debug.WriteLine("Import name is not a string, skipping.");
-                continue;
-            }
-            Debug.WriteLine($"Found mod import name: \"{modImportName}\"");
-
-            var requiredDependency = false;
-            var namedArguments = attribute.NamedArguments.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-            if (namedArguments.TryGetValue("RequiredDependency", out var requiredDependencyArgument))
-            {
-                if (requiredDependencyArgument.Kind == TypedConstantKind.Error)
-                {
-                    Debug.WriteLine("Required dependency argument is in error, skipping.");
-                    continue;
-                }
-
-                if (requiredDependencyArgument.Value is not bool requiredDependencyValue)
-                {
-                    Debug.WriteLine("Required dependency argument is not a bool, skipping.");
-                    continue;
-                }
-
-                requiredDependency = requiredDependencyValue;
-                Debug.WriteLine($"RequiredDependency defined as {requiredDependency}.");
-            }
-            else
-                Debug.WriteLine("RequiredDependency not defined, treating as false.");
-
-            return (classDeclaration, new ModImportMetadata(modImportName, requiredDependency));
+            Debug.WriteLine($"\"{GenerateImportsAttributeTypeName}\" argument count is less than 1, skipping.");
+            return failedDeclaration;
         }
 
-        throw new InvalidOperationException($"Cannot find {GenerateImportsAttributeFqn} attribute!");
+        var modImportNameArgument = ctorArgs[0];
+        if (modImportNameArgument.Kind == TypedConstantKind.Error)
+        {
+            Debug.WriteLine($"\"{GenerateImportsAttributeTypeName}\" name argument is in error, skipping.");
+            return failedDeclaration;
+        }
+
+        if (modImportNameArgument.Value is not string modImportName)
+        {
+            Debug.WriteLine($"\"{GenerateImportsAttributeTypeName}\" name is not a string, skipping.");
+            return failedDeclaration;
+        }
+
+        Debug.WriteLine($"Found mod import name: \"{modImportName}\"");
+
+        var requiredDependency = false;
+        var namedArguments = attribute.NamedArguments.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        if (namedArguments.TryGetValue("RequiredDependency", out var requiredDependencyArgument))
+        {
+            if (requiredDependencyArgument.Kind == TypedConstantKind.Error)
+            {
+                Debug.WriteLine($"\"{GenerateImportsAttributeTypeName}\" \"RequiredDependency\" argument is in error.");
+                return failedDeclaration;
+            }
+
+            if (requiredDependencyArgument.Value is not bool requiredDependencyValue)
+            {
+                Debug.WriteLine("Required dependency argument is not a bool, skipping.");
+                return failedDeclaration;
+            }
+
+            requiredDependency = requiredDependencyValue;
+            Debug.WriteLine($"RequiredDependency defined as {requiredDependency}.");
+        }
+        else
+            Debug.WriteLine("RequiredDependency not defined, treating as false.");
+
+        return (classDeclaration, new ModImportMetadata(modImportName, requiredDependency));
     }
 
     private void GenerateCode(
