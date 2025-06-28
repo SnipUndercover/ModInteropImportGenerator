@@ -60,7 +60,7 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
 
         namespace Microsoft.CodeAnalysis;
 
-        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Enum | AttributeTargets.Delegate)]
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface | AttributeTargets.Enum | AttributeTargets.Delegate)]
         internal sealed class EmbeddedAttribute : Attribute;
         """;
 
