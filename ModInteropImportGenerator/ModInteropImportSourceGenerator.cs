@@ -80,7 +80,7 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
 
         // get our syntax provider, filtering only for classes annotated with the [GenerateImports] attribute.
         // only filtered syntax nodes can trigger code generation.
-        // there's a convenient ForAttributeWithMetadataName which is
+        // there's a convenient ForAttributeWithMetadataName method for that.
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName(
             GenerateImportsAttributeFqn,
             static (node, _) => node is ClassDeclarationSyntax, // we can return `true` here but let's be sure
