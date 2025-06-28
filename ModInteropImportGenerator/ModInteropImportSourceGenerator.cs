@@ -165,7 +165,7 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
         return (classDeclaration, new ModImportMetadata(modImportName, requiredDependency));
     }
 
-    private void GenerateCode(
+    private static void GenerateCode(
         SourceProductionContext context,
         Compilation compilation,
         ImmutableArray<(ClassDeclarationSyntax classDeclaration, ModImportMetadata importMeta)> modImportDeclarations)
