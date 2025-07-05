@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\ModInteropImportGenerator.CodeFix\ModInteropImportGenerator.CodeFix.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
         <ProjectReference Include="..\ModInteropImportGenerator\ModInteropImportGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     </ItemGroup>
 
