@@ -33,6 +33,12 @@ internal static class MethodHelpers
     internal static string GetGeneratedImportDelegateName(this IMethodSymbol method)
         => $"{method.GetGeneratedImportFieldName()}Delegate";
 
+    internal static string GetGeneratedImportFieldReference(this IMethodSymbol method)
+        => $"{SourceGenerators.GeneratedModImportClassName}.{method.GetGeneratedImportFieldName()}";
+
+    internal static string GetGeneratedImportFieldInvocation(this IMethodSymbol method)
+        => $"{method.GetGeneratedImportFieldReference()}({string.Join(", ", method.GetParameterReferences())})";
+
     internal static string GetReturnType(this IMethodSymbol method)
         => method.ReturnsVoid
             ? "void"
