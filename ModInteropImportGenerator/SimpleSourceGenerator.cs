@@ -129,8 +129,8 @@ public class SimpleSourceGenerator
     public IndentContext UseIndent(int indentCount = 1)
         => new(this, indentCount);
 
-    public IndentedCodeBlockContext UseCodeBlock(int indentCount = 1)
-        => new(this, indentCount);
+    public IndentedCodeBlockContext UseCodeBlock(int indentCount = 1, bool withSemicolon = false)
+        => new(this, indentCount, withSemicolon);
 
     private void WriteIndent()
     {
@@ -154,6 +154,7 @@ public class SimpleSourceGenerator
         {
             SourceGen = sourceGen;
             IndentCount = indentCount;
+
             sourceGen.IndentLevel += indentCount;
         }
 
@@ -171,13 +172,16 @@ public class SimpleSourceGenerator
     {
         private readonly SimpleSourceGenerator SourceGen;
         private readonly int IndentCount;
+        private readonly bool WithSemicolon;
 
         private bool Disposed;
 
-        public IndentedCodeBlockContext(SimpleSourceGenerator sourceGen, int indentCount)
+        public IndentedCodeBlockContext(SimpleSourceGenerator sourceGen, int indentCount, bool withSemicolon)
         {
             SourceGen = sourceGen;
             IndentCount = indentCount;
+            WithSemicolon = withSemicolon;
+
             sourceGen.WriteLine('{');
             sourceGen.IndentLevel += indentCount;
         }
@@ -189,7 +193,10 @@ public class SimpleSourceGenerator
 
             Disposed = true;
             SourceGen.IndentLevel -= IndentCount;
-            SourceGen.WriteLine('}');
+            SourceGen.Write('}');
+            if (WithSemicolon)
+                SourceGen.Write(';');
+            SourceGen.WriteLine();
         }
     }
 }
