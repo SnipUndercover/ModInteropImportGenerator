@@ -195,24 +195,28 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
             sourceGen.WriteLine($"public static partial class {sourceGen.ClassName}");
             using (sourceGen.UseCodeBlock())
             {
+                sourceGen.WriteLine(
+                    $"public static bool? {SourceGenerators.ImportsLoadedFieldName} {{ get; private set; }}");
+                sourceGen.WriteLine();
                 SourceGenerators.GenerateMethodImplementations(sourceGen, methodsToImport);
                 sourceGen.WriteLine();
                 SourceGenerators.GenerateLoadMethod(sourceGen, methodsToImport);
+                sourceGen.WriteLine();
             }
             sourceGen.WriteLine();
 
-            sourceGen.WriteLine($"[ModImportName({SourceGenerators.GeneratedModImportClassName}.ImportName)]");
+            sourceGen.WriteLine($"[ModImportName(\"{sourceGen.ImportMeta.ImportName}\")]");
             sourceGen.WriteLine($"file class {SourceGenerators.GeneratedModImportClassName}");
             using (sourceGen.UseCodeBlock())
             {
-                sourceGen.WriteLine($"public const string ImportName = \"{importMeta.ImportName}\";");
-                sourceGen.WriteLine();
                 sourceGen.WriteLine("// Fields are initialized by ModInterop");
-                sourceGen.WriteLine("#pragma warning disable CS0649 // Field is never assigned to, and will always have its default value");
+                sourceGen.WriteLine(
+                    "#pragma warning disable CS0649 // Field is never assigned to, and will always have its default value");
                 sourceGen.WriteLine();
                 SourceGenerators.GenerateImportFields(sourceGen, methodsToImport);
                 sourceGen.WriteLine();
-                sourceGen.WriteLine("#pragma warning restore CS0649 // Field is never assigned to, and will always have its default value");
+                sourceGen.WriteLine(
+                    "#pragma warning restore CS0649 // Field is never assigned to, and will always have its default value");
             }
 
             // add the source code to the compilation
