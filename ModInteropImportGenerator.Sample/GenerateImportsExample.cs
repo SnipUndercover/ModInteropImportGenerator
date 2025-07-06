@@ -22,4 +22,6 @@ public static partial class GenerateImportsExample
     public static partial void M(ref readonly string argumentA);
     public static partial void N(int argumentA, ref int argumentB, out int argumentC, in int argumentD, ref readonly string argumentE);
     public static partial object O(int argumentA, ref int argumentB, out int argumentC, in int argumentD, ref readonly string argumentE);
+
+    public static partial object P(int argumentA, int argumentB = 0);
 }
