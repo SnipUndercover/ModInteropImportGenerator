@@ -78,7 +78,7 @@ internal static class SourceGenerators
             sourceGen.WriteLine("$\"\"\"");
             sourceGen.WriteLine(
                 $"Failed to import \"{sourceGen.ImportMeta.ImportName}\"; "
-                + $"imported {{{ExpectedMethodCountLocalName}}} out of {{{ActualMethodCountLocalName}}} methods.");
+                + $"imported {{{ActualMethodCountLocalName}}} out of {{{ExpectedMethodCountLocalName}}} methods.");
             sourceGen.WriteLine(
                 "This situation was thought to be unreachable; please report this to "
                 + $"the {nameof(ModInteropImportGenerator)} repository.");
