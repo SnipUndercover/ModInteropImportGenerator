@@ -32,17 +32,20 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
           namespace {{ImportGeneratorNamespace}};
 
           /// <summary>
-          ///   Generate ModInterop fields based on the method names and signatures.
+          ///   Generate <c>ModInterop</c> fields based on the method names and signatures.
           /// </summary>
+          /// <remarks>
+          ///   See the documentation in the <c>ModInteropImportGenerator</c> repository.
+          /// </remarks>
           /// <param name="modInteropName">
-          ///   The ModExportName from which to import.
+          ///   The export name of the export class of interest.
           /// </param>
           [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
           [Microsoft.CodeAnalysis.Embedded]
           internal class {{GenerateImportsAttributeTypeName}}(string modInteropName) : Attribute
           {
               /// <summary>
-              ///   The ModExportName whose methods should be imported.
+              ///   The export name of the export class whose methods should be imported.
               /// </summary>
               public string ModInteropName { get; } = modInteropName;
 
@@ -50,6 +53,10 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
               ///   Whether this import is a required dependency, and should crash the game
               ///   if the import did not load successfully.
               /// </summary>
+              /// <remarks>
+              ///   When importing a required dependency, an exception will be thrown if any of the imported methods
+              ///   fail to import.
+              /// </remarks>
               public bool RequiredDependency { get; set; } = false;
           }
           """;
