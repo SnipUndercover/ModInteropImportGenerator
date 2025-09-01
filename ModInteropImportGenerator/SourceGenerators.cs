@@ -6,12 +6,12 @@ namespace ModInteropImportGenerator;
 
 internal static class SourceGenerators
 {
+    private const string ImportStateNotImported
+        = ModInteropImportSourceGenerator.ImportStateNotImportedEnumReference;
     private const string ImportStateOk
         = ModInteropImportSourceGenerator.ImportStateOkEnumReference;
     private const string ImportStateDependencyNotPresent
         = ModInteropImportSourceGenerator.ImportStateDependencyNotPresentEnumReference;
-    private const string ImportStateNotImported
-        = ModInteropImportSourceGenerator.ImportStateNotImportedEnumReference;
     private const string ImportStatePartialImport
         = ModInteropImportSourceGenerator.ImportStatePartialImportEnumReference;
     private const string ImportStateUnknownFailure

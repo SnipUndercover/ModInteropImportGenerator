@@ -72,20 +72,21 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
         """;
 
     internal const string ImportStateEnumTypeName = "ImportState";
+
+    internal const string ImportStateNotImportedEnumName = "NotImported";
     internal const string ImportStateOkEnumName = "Ok";
     internal const string ImportStateDependencyNotPresentEnumName = "DependencyNotPresent";
     internal const string ImportStatePartialImportEnumName = "PartialImport";
-    internal const string ImportStateNotImportedEnumName = "NotImported";
     internal const string ImportStateUnknownFailureEnumName = "UnknownFailure";
 
+    internal const string ImportStateNotImportedEnumReference
+        = $"{ImportStateEnumTypeName}.{ImportStateNotImportedEnumName}";
     internal const string ImportStateOkEnumReference
         = $"{ImportStateEnumTypeName}.{ImportStateOkEnumName}";
     internal const string ImportStateDependencyNotPresentEnumReference
         = $"{ImportStateEnumTypeName}.{ImportStateDependencyNotPresentEnumName}";
     internal const string ImportStatePartialImportEnumReference
         = $"{ImportStateEnumTypeName}.{ImportStatePartialImportEnumName}";
-    internal const string ImportStateNotImportedEnumReference
-        = $"{ImportStateEnumTypeName}.{ImportStateNotImportedEnumName}";
     internal const string ImportStateUnknownFailureEnumReference
         = $"{ImportStateEnumTypeName}.{ImportStateUnknownFailureEnumName}";
 
@@ -100,6 +101,11 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
           public enum {{ImportStateEnumTypeName}}
           {
               /// <summary>
+              ///   The import state is unknown, because <c>{{SourceGenerators.LoadMethodName}}()</c> has not yet been invoked.
+              /// </summary>
+              {{ImportStateNotImportedEnumName}},
+
+              /// <summary>
               ///   The import completed successfully.
               /// </summary>
               {{ImportStateOkEnumName}},
@@ -108,11 +114,6 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
               ///   The import was unsuccessful, because the dependency is not present.
               /// </summary>
               {{ImportStateDependencyNotPresentEnumName}},
-
-              /// <summary>
-              ///   The import state is unknown, because <c>{{SourceGenerators.LoadMethodName}}()</c> has not yet been invoked.
-              /// </summary>
-              {{ImportStateNotImportedEnumName}},
 
               /// <summary>
               ///   The import was partially successful; one or more methods has not been imported.
@@ -262,7 +263,7 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
             {
                 sourceGen.WriteLine(
                     $"public static {ImportStateEnumTypeName} {SourceGenerators.ImportStateFieldName} "
-                    + $"{{ get; private set; }} = {ImportStateNotImportedEnumReference};");
+                    + $"{{ get; private set; }}");
                 sourceGen.WriteLine(
                     $"public static bool {SourceGenerators.ImportsLoadedFieldName} {{ get; private set; }}");
                 sourceGen.WriteLine();
