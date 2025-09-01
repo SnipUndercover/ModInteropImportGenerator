@@ -110,7 +110,7 @@ internal static class SourceGenerators
         sourceGen.WriteLine(
             $"No suitable export method found for import method \"{sourceGen.ImportMeta.ImportName}.{method.Name}\".");
         sourceGen.WriteLine(
-            "Check if the dependency is enabled, and that the import name as well as import method name and signature"
+            "Check if the dependency is enabled, and that the import name as well as import method name and signature "
             + "match that of the export method.");
         sourceGen.WriteLine(
             $"[failing method: {method.ToDisplayString(PartialMethodImplementationFormat)}]");
