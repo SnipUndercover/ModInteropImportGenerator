@@ -131,7 +131,7 @@ set to the built source generator DLL.
 
 ## Usage
 
-Importing methods is done in a very similar fashion to how it was previously done with `ModImportName` and
+Importing methods is done in a very similar fashion to how it was previously done with `[ModImportName]` and
 `typeof(...).ModInterop();`.
 
 Define a `public static partial` class and give it the `[GenerateImports]` attribute. Make sure the import name matches
