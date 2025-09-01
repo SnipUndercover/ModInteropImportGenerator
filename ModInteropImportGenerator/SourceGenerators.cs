@@ -39,8 +39,8 @@ internal static class SourceGenerators
 
         const string ExpectedMethodCountLocalName = "expectedMethodCount";
         const string ActualMethodCountLocalName = "actualMethodCount";
-        sourceGen.WriteLine($"const int {ExpectedMethodCountLocalName} = {methods.Count};");
-        sourceGen.WriteLine($"int {ActualMethodCountLocalName} = 0;");
+        sourceGen.WriteLine($"const uint {ExpectedMethodCountLocalName} = {methods.Count};");
+        sourceGen.WriteLine($"uint {ActualMethodCountLocalName} = 0;");
         sourceGen.WriteLine();
 
         foreach (IMethodSymbol method in methods)
