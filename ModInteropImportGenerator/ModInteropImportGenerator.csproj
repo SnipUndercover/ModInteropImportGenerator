@@ -2,15 +2,14 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <IsPackable>false</IsPackable>
         <Nullable>enable</Nullable>
+        <IsPackable>true</IsPackable>
         <LangVersion>latest</LangVersion>
 
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <IsRoslynComponent>true</IsRoslynComponent>
 
         <RootNamespace>ModInteropImportGenerator</RootNamespace>
-        <PackageId>ModInteropImportGenerator</PackageId>
     </PropertyGroup>
 
     <ItemGroup>
@@ -22,5 +21,33 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
     </ItemGroup>
 
+    <!-- NuGet package stuff -->
+    <PropertyGroup>
+        <PackageId>ModInteropImportGenerator</PackageId>
+        <Version>1.0.0</Version>
+        <Authors>SnipUndercover</Authors>
+        <Product>ModInteropImportGenerator</Product>
+        <Title>ModInterop Import Generator</Title>
+        <PackageDescription>Source generator for MonoMod.ModInterop imports.</PackageDescription>
 
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <!-- Build a NuGet package on a Release build -->
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <!-- Don't include build output, as we're not a library -->
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <!-- We don't include dependencies, so suppress the warning -->
+        <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+        <!-- We're a development-time dependency only, don't make ourselves a transitive dependency -->
+        <DevelopmentDependency>true</DevelopmentDependency>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(Configuration)' == 'Release'">
+        <!-- Package the generator in the analyzer directory of the nuget package if building in Release -->
+        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+        <!-- Add a README -->
+        <None Include="../README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
 </Project>
