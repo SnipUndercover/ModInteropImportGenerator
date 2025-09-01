@@ -1,9 +1,5 @@
 # ModInteropImportGenerator
 
-> [!NOTE]
-> Currently WIP. I just put the repository so that I don't lose it in the future.  
-> *(and also to share, i guess)*
-
 Generates `MonoMod.ModInterop` imports based on a given method signature and name.
 
 <!-- TOC -->
