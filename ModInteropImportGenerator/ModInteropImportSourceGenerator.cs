@@ -50,8 +50,7 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
               public string ModInteropName { get; } = modInteropName;
 
               /// <summary>
-              ///   Whether this import is a required dependency, and should crash the game
-              ///   if the import did not load successfully.
+              ///   Whether this import is considered a required dependency.
               /// </summary>
               /// <remarks>
               ///   When importing a required dependency, an exception will be thrown if any of the imported methods
@@ -72,6 +71,61 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
         internal sealed class EmbeddedAttribute : Attribute;
         """;
 
+    internal const string ImportStateEnumTypeName = "ImportState";
+    internal const string ImportStateOkEnumName = "Ok";
+    internal const string ImportStateDependencyNotPresentEnumName = "DependencyNotPresent";
+    internal const string ImportStatePartialImportEnumName = "PartialImport";
+    internal const string ImportStateNotImportedEnumName = "NotImported";
+    internal const string ImportStateUnknownFailureEnumName = "UnknownFailure";
+
+    internal const string ImportStateOkEnumReference
+        = $"{ImportStateEnumTypeName}.{ImportStateOkEnumName}";
+    internal const string ImportStateDependencyNotPresentEnumReference
+        = $"{ImportStateEnumTypeName}.{ImportStateDependencyNotPresentEnumName}";
+    internal const string ImportStatePartialImportEnumReference
+        = $"{ImportStateEnumTypeName}.{ImportStatePartialImportEnumName}";
+    internal const string ImportStateNotImportedEnumReference
+        = $"{ImportStateEnumTypeName}.{ImportStateNotImportedEnumName}";
+    internal const string ImportStateUnknownFailureEnumReference
+        = $"{ImportStateEnumTypeName}.{ImportStateUnknownFailureEnumName}";
+
+    [LanguageInjection("C#")]
+    private const string ImportStatusEnumDefinition =
+        $$"""
+          namespace {{ImportGeneratorNamespace}};
+          
+          /// <summary>
+          ///   The state of the import.
+          /// </summary>
+          public enum {{ImportStateEnumTypeName}}
+          {
+              /// <summary>
+              ///   The import completed successfully.
+              /// </summary>
+              {{ImportStateOkEnumName}},
+
+              /// <summary>
+              ///   The import was unsuccessful, because the dependency is not present.
+              /// </summary>
+              {{ImportStateDependencyNotPresentEnumName}},
+
+              /// <summary>
+              ///   The import state is unknown, because <c>{{SourceGenerators.LoadMethodName}}()</c> has not yet been invoked.
+              /// </summary>
+              {{ImportStateNotImportedEnumName}},
+
+              /// <summary>
+              ///   The import was partially successful; one or more methods has not been imported.
+              /// </summary>
+              {{ImportStatePartialImportEnumName}},
+
+              /// <summary>
+              ///   The import was unsuccessful for an unknown reason.
+              /// </summary>
+              {{ImportStateUnknownFailureEnumName}},
+          }
+          """;
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         // add the attribute so that IDEs can pick up on it and let the user use it
@@ -84,6 +138,9 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
             ctx.AddSource(
                 $"{GenerateImportsAttributeTypeName}.g.cs",
                 SourceText.From(GenerateImportsAttributeDefinition, Encoding.UTF8));
+            ctx.AddSource(
+                $"{ImportStateEnumTypeName}.g.cs",
+                SourceText.From(ImportStatusEnumDefinition, Encoding.UTF8));
         });
 
         // get our syntax provider, filtering only for classes annotated with the [GenerateImports] attribute.
@@ -198,13 +255,16 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
                 .Where(m => m.IsPartialDefinition && m.PartialImplementationPart is null)
                 .ToList();
 
-            sourceGen.AddUsings("System", "System.Diagnostics", "MonoMod.ModInterop");
+            sourceGen.AddUsings("System", "System.Diagnostics", "MonoMod.ModInterop", "ModInteropImportGenerator");
 
             sourceGen.WriteLine($"public static partial class {sourceGen.ClassName}");
             using (sourceGen.UseCodeBlock())
             {
                 sourceGen.WriteLine(
-                    $"public static bool? {SourceGenerators.ImportsLoadedFieldName} {{ get; private set; }}");
+                    $"public static {ImportStateEnumTypeName} {SourceGenerators.ImportStateFieldName} "
+                    + $"{{ get; private set; }} = {ImportStateNotImportedEnumReference};");
+                sourceGen.WriteLine(
+                    $"public static bool {SourceGenerators.ImportsLoadedFieldName} {{ get; private set; }}");
                 sourceGen.WriteLine();
                 SourceGenerators.GenerateMethodImplementations(sourceGen, methodsToImport);
                 sourceGen.WriteLine();

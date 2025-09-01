@@ -191,15 +191,10 @@ You may now call the import methods.
 By default, the source generator will treat the import class as an optional dependency.
 If the dependency is not present at the time `Load()` is called, the import methods will throw an exception when called.
 
-To safely call an import method, you must check if the `IsImported` `bool?` property is `true`.
-
-> [!NOTE]
-> This behavior is being changed in a future version. The tristate will be moved to a new `ImportState` `enum` field,
-> and `IsImported` will be replaced with a `bool` property, which will be set to `true` if the `ImportState`
-> indicates success.
+To safely call an import method, you must check if the `IsImported` `bool` property is `true`.
 
 ```cs
-if (DashStates.IsImported is true)
+if (DashStates.IsImported)
     DashStates.GetDreamTunnelDashState();
 ```
 
@@ -217,6 +212,8 @@ public static partial class DashStates
     // ...
 }
 ```
+
+You can see the state of the import in the `ImportState` property of the import class.
 
 ## Building
 

@@ -6,8 +6,20 @@ namespace ModInteropImportGenerator;
 
 internal static class SourceGenerators
 {
+    private const string ImportStateOk
+        = ModInteropImportSourceGenerator.ImportStateOkEnumReference;
+    private const string ImportStateDependencyNotPresent
+        = ModInteropImportSourceGenerator.ImportStateDependencyNotPresentEnumReference;
+    private const string ImportStateNotImported
+        = ModInteropImportSourceGenerator.ImportStateNotImportedEnumReference;
+    private const string ImportStatePartialImport
+        = ModInteropImportSourceGenerator.ImportStatePartialImportEnumReference;
+    private const string ImportStateUnknownFailure
+        = ModInteropImportSourceGenerator.ImportStateUnknownFailureEnumReference;
+
     internal const string GeneratedModImportClassName = "GeneratedModImport";
     internal const string ImportsLoadedFieldName = "IsImported";
+    internal const string ImportStateFieldName = "ImportState";
     internal const string LoadMethodName = "Load";
 
     private static readonly SymbolDisplayFormat PartialMethodImplementationFormat =
@@ -25,17 +37,6 @@ internal static class SourceGenerators
         sourceGen.WriteLine($"typeof({GeneratedModImportClassName}).ModInterop();");
         sourceGen.WriteLine();
 
-        if (sourceGen.ImportMeta.RequiredDependency)
-        {
-            foreach (IMethodSymbol method in methods)
-            {
-                GenerateLoadTimeImportValidatorGuard(sourceGen, method);
-                sourceGen.WriteLine();
-            }
-            sourceGen.WriteLine($"{ImportsLoadedFieldName} = true;");
-            return;
-        }
-
         const string ExpectedMethodCountLocalName = "expectedMethodCount";
         const string ActualMethodCountLocalName = "actualMethodCount";
         sourceGen.WriteLine($"const int {ExpectedMethodCountLocalName} = {methods.Count};");
@@ -52,18 +53,24 @@ internal static class SourceGenerators
         }
         sourceGen.WriteLine();
 
-        sourceGen.WriteLine($"{ImportsLoadedFieldName} = {ActualMethodCountLocalName} switch");
+        sourceGen.WriteLine($"{ImportStateFieldName} = {ActualMethodCountLocalName} switch");
         using (sourceGen.UseCodeBlock(withSemicolon: true))
         {
-            sourceGen.WriteLine($"{ExpectedMethodCountLocalName} => true,");
-            sourceGen.WriteLine("0 => false,");
-            sourceGen.WriteLine("_ => null");
+            sourceGen.WriteLine($"{ExpectedMethodCountLocalName} => {ImportStateOk},");
+            sourceGen.WriteLine($"0 => {ImportStateDependencyNotPresent},");
+            sourceGen.WriteLine($"_ => {ImportStatePartialImport}");
         }
+        sourceGen.WriteLine($"{ImportsLoadedFieldName} = {ImportStateFieldName} == {ImportStateOk};");
         sourceGen.WriteLine();
 
-        sourceGen.WriteLine($"if ({ImportsLoadedFieldName} is not null)");
+        sourceGen.Write($"if ({ImportStateFieldName} is {ImportStateOk}");
+        if (!sourceGen.ImportMeta.RequiredDependency)
+            sourceGen.Write($" or {ImportStateDependencyNotPresent}");
+        sourceGen.WriteLine(")");
+
         using (sourceGen.UseIndent())
             sourceGen.WriteLine("return;");
+
         sourceGen.WriteLine();
 
         foreach (IMethodSymbol method in methods)
@@ -72,6 +79,7 @@ internal static class SourceGenerators
             sourceGen.WriteLine();
         }
 
+        sourceGen.WriteLine($"{ImportStateFieldName} = {ImportStateUnknownFailure};");
         sourceGen.WriteLine("throw new UnreachableException(");
         using (sourceGen.UseIndent())
         {
@@ -93,79 +101,20 @@ internal static class SourceGenerators
         string importReference = method.GetGeneratedImportFieldReference();
 
         sourceGen.WriteLine($"if ({importReference} is null)");
-        using (sourceGen.UseIndent())
-            GenerateLoadTimeFailedImportException(sourceGen, method);
-    }
+        using var _ = sourceGen.UseIndent();
 
-    private static void GenerateRuntimeImportValidatorGuard(
-        SimpleSourceGenerator sourceGen,
-        IMethodSymbol method)
-    {
-        if (!sourceGen.ImportMeta.RequiredDependency)
-        {
-            sourceGen.WriteLine($"if ({ImportsLoadedFieldName} is false)");
-            using (sourceGen.UseIndent())
-                GenerateRuntimeFailedImportException(sourceGen, method);
-            sourceGen.WriteLine();
-        }
-
-        sourceGen.WriteLine($"if ({ImportsLoadedFieldName} is null)");
-        using (sourceGen.UseIndent())
-            GenerateUnloadedImportException(sourceGen, method);
-    }
-
-    private static void GenerateLoadTimeFailedImportException(
-        SimpleSourceGenerator sourceGen,
-        IMethodSymbol method)
-    {
         sourceGen.WriteLine("throw new InvalidOperationException(");
-        using (sourceGen.UseIndent())
-        {
-            sourceGen.WriteLine("\"\"\"");
-            sourceGen.WriteLine(
-                $"No suitable export found for import \"{sourceGen.ImportMeta.ImportName}.{method.Name}\".");
-            sourceGen.WriteLine(
-                "Check if the export mod is enabled, and that the import name and method definitions "
-                + "match that of the export.");
-            sourceGen.WriteLine(
-                $"[failing method: {method.ToDisplayString(PartialMethodImplementationFormat)}]");
-            sourceGen.WriteLine("\"\"\");");
-        }
-    }
+        using var __ = sourceGen.UseIndent();
 
-    private static void GenerateRuntimeFailedImportException(
-        SimpleSourceGenerator sourceGen,
-        IMethodSymbol method)
-    {
-        sourceGen.WriteLine("throw new InvalidOperationException(");
-        using (sourceGen.UseIndent())
-        {
-            sourceGen.WriteLine("\"\"\"");
-            sourceGen.WriteLine(
-                $"Attempted to call import \"{sourceGen.ImportMeta.ImportName}.{method.Name}\" "
-                + $"while the dependency is disabled.");
-            sourceGen.WriteLine(
-                $"Ensure that \"{sourceGen.ClassName}.{ImportsLoadedFieldName}\" is true before calling this method.");
-            sourceGen.WriteLine(
-                "If it is, check if the export mod is enabled, and that the import name and method definitions "
-                + "match that of the export.");
-            sourceGen.WriteLine("\"\"\");");
-        }
-    }
-
-    private static void GenerateUnloadedImportException(
-        SimpleSourceGenerator sourceGen,
-        IMethodSymbol method)
-    {
-        sourceGen.WriteLine("throw new NotImplementedException(");
-        using (sourceGen.UseIndent())
-        {
-            sourceGen.WriteLine("\"\"\"");
-            sourceGen.WriteLine(
-                $"Attempted to call import \"{sourceGen.ImportMeta.ImportName}.{method.Name}\" before importing it.");
-            sourceGen.WriteLine($"Ensure that \"{sourceGen.ClassName}.{LoadMethodName}()\" has been called first.");
-            sourceGen.WriteLine("\"\"\");");
-        }
+        sourceGen.WriteLine("\"\"\"");
+        sourceGen.WriteLine(
+            $"No suitable export method found for import method \"{sourceGen.ImportMeta.ImportName}.{method.Name}\".");
+        sourceGen.WriteLine(
+            "Check if the dependency is enabled, and that the import name as well as import method name and signature"
+            + "match that of the export method.");
+        sourceGen.WriteLine(
+            $"[failing method: {method.ToDisplayString(PartialMethodImplementationFormat)}]");
+        sourceGen.WriteLine("\"\"\");");
     }
 
     internal static void GenerateMethodImplementations(
@@ -195,17 +144,96 @@ internal static class SourceGenerators
             sourceGen.TryAddUsingFor(parameter.Type);
 
         string methodSignature = method.ToDisplayString(PartialMethodImplementationFormat);
-        string importInvocation = method.GetGeneratedImportFieldInvocation();
 
         sourceGen.WriteLine($"public static partial {methodSignature}");
         using (sourceGen.UseCodeBlock())
         {
-            GenerateRuntimeImportValidatorGuard(sourceGen, method);
-
+            GenerateImportInvocation(sourceGen, method);
             sourceGen.WriteLine();
-            sourceGen.WriteLine(method.ReturnsVoid
-                ? $"{importInvocation};"
-                : $"return {importInvocation};");
+            GenerateDependencyNotPresentStateGuard(sourceGen, method);
+            sourceGen.WriteLine();
+            GenerateUnknownStateGuard(sourceGen, method);
+            sourceGen.WriteLine();
+            GenerateCatchAllGuard(sourceGen, method);
+        }
+    }
+
+    private static void GenerateImportInvocation(
+        SimpleSourceGenerator sourceGen,
+        IMethodSymbol method)
+    {
+        string importInvocation = method.GetGeneratedImportFieldInvocation();
+
+        sourceGen.WriteLine(
+            $"if ({ImportStateFieldName} == {ImportStateOk})");
+
+        if (!method.ReturnsVoid)
+        {
+            using (sourceGen.UseIndent())
+                sourceGen.WriteLine($"return {importInvocation};");
+            return;
+        }
+
+        using (sourceGen.UseCodeBlock())
+        {
+            sourceGen.WriteLine($"{importInvocation};");
+            sourceGen.WriteLine("return;");
+        }
+    }
+
+    private static void GenerateDependencyNotPresentStateGuard(
+        SimpleSourceGenerator sourceGen,
+        IMethodSymbol method)
+    {
+        sourceGen.WriteLine(
+            $"if ({ImportStateFieldName} == {ImportStateDependencyNotPresent})");
+        using var _ = sourceGen.UseIndent();
+
+        sourceGen.WriteLine("throw new InvalidOperationException(");
+        using var __ = sourceGen.UseIndent();
+
+        sourceGen.WriteLine("\"\"\"");
+        sourceGen.WriteLine(
+            $"Attempted to call import method \"{sourceGen.ImportMeta.ImportName}.{method.Name}\" "
+            + $"but the dependency is not present.");
+        sourceGen.WriteLine(
+            $"Ensure that \"{sourceGen.ClassName}.{ImportsLoadedFieldName}\" is true before calling the import method.");
+        sourceGen.WriteLine(
+            "If it is, check if the dependency is enabled, and that the import name as well as import method name "
+            + "and signature match that of the export method.");
+        sourceGen.WriteLine("\"\"\");");
+    }
+
+    private static void GenerateUnknownStateGuard(
+        SimpleSourceGenerator sourceGen,
+        IMethodSymbol method)
+    {
+        sourceGen.WriteLine($"if ({ImportStateFieldName} == {ImportStateNotImported})");
+        using var _ = sourceGen.UseIndent();
+
+        sourceGen.WriteLine("throw new NotImplementedException(");
+        using var __ = sourceGen.UseIndent();
+
+        sourceGen.WriteLine("\"\"\"");
+        sourceGen.WriteLine(
+            $"Attempted to call import \"{sourceGen.ImportMeta.ImportName}.{method.Name}\" before importing it.");
+        sourceGen.WriteLine($"Ensure that \"{sourceGen.ClassName}.{LoadMethodName}()\" has been called first.");
+        sourceGen.WriteLine("\"\"\");");
+    }
+
+    private static void GenerateCatchAllGuard(
+        SimpleSourceGenerator sourceGen,
+        IMethodSymbol method)
+    {
+        sourceGen.WriteLine("throw new UnreachableException(");
+        using (sourceGen.UseIndent())
+        {
+            sourceGen.WriteLine("\"\"\"");
+            sourceGen.WriteLine(
+                $"Attempted to call import \"{sourceGen.ImportMeta.ImportName}.{method.Name}\", "
+                + $"but the import class is in an invalid state.");
+            sourceGen.WriteLine($"Check the value of the \"{ImportStateFieldName}\" field for the cause.");
+            sourceGen.WriteLine("\"\"\");");
         }
     }
 
