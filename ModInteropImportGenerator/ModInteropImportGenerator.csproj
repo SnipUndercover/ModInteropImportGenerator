@@ -31,6 +31,7 @@
         <PackageDescription>Source generator for MonoMod.ModInterop imports.</PackageDescription>
 
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'Release'">
@@ -47,7 +48,8 @@
     <ItemGroup Condition="'$(Configuration)' == 'Release'">
         <!-- Package the generator in the analyzer directory of the nuget package if building in Release -->
         <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-        <!-- Add a README -->
+        <!-- Add a README and license -->
         <None Include="../README.md" Pack="true" PackagePath="\"/>
+        <None Include="../LICENSE.txt" Pack="true" PackagePath="\"/>
     </ItemGroup>
 </Project>
