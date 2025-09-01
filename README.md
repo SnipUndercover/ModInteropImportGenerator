@@ -116,16 +116,11 @@ public static partial class DashStates
 
 ## Referencing
 
-> [!NOTE]
-> The source generator is planned to eventually be published as a NuGet package.
-> For the time being, you'll need to compile the source generator yourself &ndash; see the build instructions at the bottom.
-
-Edit your mod's `.csproj`. Inside an `<ItemGroup>`, add the `<Analyzer>` tag, with  the `Include` path
-set to the built source generator DLL.
+Add the `ModInteropImportGenerator` NuGet package to your csproj like so:
 
 ```xml
 <ItemGroup>
-    <Analyzer Include="path/to/ModInteropImportGenerator.dll" />
+    <PackageReference Include="ModInteropImportGenerator" Version="*" />
 </ItemGroup>
 ```
 
