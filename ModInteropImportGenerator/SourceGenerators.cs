@@ -191,8 +191,7 @@ internal static class SourceGenerators
     {
         string importInvocation = method.GetGeneratedImportFieldInvocation();
 
-        sourceGen.WriteLine(
-            $"if ({ImportStateFieldName} == {ImportStateOk})");
+        sourceGen.WriteLine($"if ({ImportStateFieldName} == {ImportStateOk})");
 
         if (!method.ReturnsVoid)
         {
