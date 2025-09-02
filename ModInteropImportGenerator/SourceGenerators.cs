@@ -79,6 +79,8 @@ internal static class SourceGenerators
             using (sourceGen.UseIndent())
                 sourceGen.WriteLine("return;");
 
+            sourceGen.WriteLine();
+
             sourceGen.WriteLine($"if ({ImportStateFieldName} == {ImportStateFailedImport})");
             using (sourceGen.UseIndent())
             {
