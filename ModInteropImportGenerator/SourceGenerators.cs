@@ -179,7 +179,7 @@ internal static class SourceGenerators
             sourceGen.WriteLine();
             GenerateFailedImportStateGuard(sourceGen, method);
             sourceGen.WriteLine();
-            GenerateUnknownStateGuard(sourceGen, method);
+            GenerateNotImportedStateGuard(sourceGen, method);
             sourceGen.WriteLine();
             GenerateCatchAllGuard(sourceGen, method);
         }
@@ -231,7 +231,7 @@ internal static class SourceGenerators
         sourceGen.WriteLine("\"\"\");");
     }
 
-    private static void GenerateUnknownStateGuard(
+    private static void GenerateNotImportedStateGuard(
         SimpleSourceGenerator sourceGen,
         IMethodSymbol method)
     {
