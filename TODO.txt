@@ -1,0 +1,2 @@
+﻿- Figure out how to put MonoMod.ModInterop in NuGet dependencies (since we rely on MonoMod.ModInterop.ModImportName)
+- Testing? Sometime? (I have no idea how to even test this properly)
