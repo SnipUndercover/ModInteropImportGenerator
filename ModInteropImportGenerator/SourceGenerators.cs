@@ -252,7 +252,7 @@ internal static class SourceGenerators
         SimpleSourceGenerator sourceGen,
         IMethodSymbol method)
     {
-        sourceGen.WriteLine("throw new UnreachableException(");
+        sourceGen.WriteLine("throw new InvalidOperationException(");
         using (sourceGen.UseIndent())
         {
             sourceGen.WriteLine("\"\"\"");
