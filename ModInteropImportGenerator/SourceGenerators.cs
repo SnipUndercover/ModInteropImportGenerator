@@ -69,17 +69,17 @@ internal static class SourceGenerators
 
         if (!sourceGen.ImportMeta.RequiredDependency)
         {
-            sourceGen.Write($"if ({ImportStateFieldName} is {ImportStateOk} or {ImportStateFailedImport})");
+            sourceGen.WriteLine($"if ({ImportStateFieldName} is {ImportStateOk} or {ImportStateFailedImport})");
             using (sourceGen.UseIndent())
                 sourceGen.WriteLine("return;");
         }
         else
         {
-            sourceGen.Write($"if ({ImportStateFieldName} == {ImportStateOk})");
+            sourceGen.WriteLine($"if ({ImportStateFieldName} == {ImportStateOk})");
             using (sourceGen.UseIndent())
                 sourceGen.WriteLine("return;");
 
-            sourceGen.Write($"if ({ImportStateFieldName} == {ImportStateFailedImport})");
+            sourceGen.WriteLine($"if ({ImportStateFieldName} == {ImportStateFailedImport})");
             using (sourceGen.UseIndent())
             {
                 sourceGen.WriteLine("throw new InvalidOperationException(");
