@@ -29,6 +29,9 @@
         <Product>ModInteropImportGenerator</Product>
         <Title>ModInterop Import Generator</Title>
         <PackageDescription>Source generator for MonoMod.ModInterop imports.</PackageDescription>
+        <RepositoryUrl>https://github.com/SnipUndercover/ModInteropImportGenerator/</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>MonoMod.ModInterop,ModInterop,source generator,sourcegen,roslyn,import,export,mod,modding</PackageTags>
 
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
