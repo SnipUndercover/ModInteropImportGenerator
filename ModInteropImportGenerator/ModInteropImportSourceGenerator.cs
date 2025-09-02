@@ -278,9 +278,18 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
 
             sourceGen.AddUsings("System", "System.Diagnostics", "MonoMod.ModInterop", "ModInteropImportGenerator");
 
-            sourceGen.WriteLine($"public static partial class {sourceGen.ClassName}");
-            using (sourceGen.UseCodeBlock())
+            var classes = classDeclaration.AncestorsAndSelf().OfType<ClassDeclarationSyntax>().ToArray();
+            using (var indent = sourceGen.StartMultiIndent())
             {
+                for (int i = classes.Length - 1; i >= 0; i--)
+                {
+                    sourceGen.WriteLine(classes[i] switch
+                    {
+                        ClassDeclarationSyntax c => $"public static partial class {c.Identifier.Text}",
+                    });
+                    indent.Indent();
+                }
+
                 sourceGen.WriteLine(
                     $"public static {ImportStateEnumTypeName} {SourceGenerators.ImportStateFieldName} "
                     + $"{{ get; private set; }}");
