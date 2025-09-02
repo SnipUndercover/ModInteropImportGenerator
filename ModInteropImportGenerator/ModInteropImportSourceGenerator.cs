@@ -76,6 +76,7 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
     internal const string ImportStateNotImportedEnumName = "NotImported";
     internal const string ImportStateOkEnumName = "Ok";
     internal const string ImportStateDependencyNotPresentEnumName = "DependencyNotPresent";
+    internal const string ImportStateFailedImportEnumName = "FailedImport";
     internal const string ImportStatePartialImportEnumName = "PartialImport";
     internal const string ImportStateUnknownFailureEnumName = "UnknownFailure";
 
@@ -83,8 +84,11 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
         = $"{ImportStateEnumTypeName}.{ImportStateNotImportedEnumName}";
     internal const string ImportStateOkEnumReference
         = $"{ImportStateEnumTypeName}.{ImportStateOkEnumName}";
+    [Obsolete($"This state is currently unused. Use {nameof(ImportStateFailedImportEnumReference)} instead.")]
     internal const string ImportStateDependencyNotPresentEnumReference
         = $"{ImportStateEnumTypeName}.{ImportStateDependencyNotPresentEnumName}";
+    internal const string ImportStateFailedImportEnumReference
+        = $"{ImportStateEnumTypeName}.{ImportStateFailedImportEnumName}";
     internal const string ImportStatePartialImportEnumReference
         = $"{ImportStateEnumTypeName}.{ImportStatePartialImportEnumName}";
     internal const string ImportStateUnknownFailureEnumReference
@@ -93,8 +97,10 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
     [LanguageInjection("C#")]
     private const string ImportStatusEnumDefinition =
         $$"""
+          using System;
+
           namespace {{ImportGeneratorNamespace}};
-          
+
           /// <summary>
           ///   The state of the import.
           /// </summary>
@@ -113,7 +119,21 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
               /// <summary>
               ///   The import was unsuccessful, because the dependency is not present.
               /// </summary>
+              /// <remarks>
+              ///   Previously this state was used when none of the import methods were imported successfully.
+              ///   However, this would not inherently mean that the dependency was not present - it is possible that
+              ///   the dependency is present, but none of the import methods' names and signatures were compatible with
+              ///   any of the available export methods.<br/>
+              ///   As there is no way to know for sure at this time, this state is currently unused.
+              /// </remarks>
+              [Obsolete("This state is currently unused. See the remarks for more information. Use {{ImportStateFailedImportEnumName}} instead.")]
               {{ImportStateDependencyNotPresentEnumName}},
+
+              /// <summary>
+              ///   The import was unsuccessful, either because the dependency was not present, or none of the
+              ///   import methods' names and signatures were compatible with any of the available export methods.
+              /// </summary>
+              {{ImportStateFailedImportEnumName}},
 
               /// <summary>
               ///   The import was partially successful; one or more methods has not been imported.

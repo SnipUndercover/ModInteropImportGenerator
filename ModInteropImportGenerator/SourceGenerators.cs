@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using ModInteropImportGenerator.Helpers;
 
@@ -10,8 +11,11 @@ internal static class SourceGenerators
         = ModInteropImportSourceGenerator.ImportStateNotImportedEnumReference;
     private const string ImportStateOk
         = ModInteropImportSourceGenerator.ImportStateOkEnumReference;
+    [Obsolete($"This state is currently unused. Use {nameof(ImportStateFailedImport)} instead.")]
     private const string ImportStateDependencyNotPresent
         = ModInteropImportSourceGenerator.ImportStateDependencyNotPresentEnumReference;
+    private const string ImportStateFailedImport
+        = ModInteropImportSourceGenerator.ImportStateFailedImportEnumReference;
     private const string ImportStatePartialImport
         = ModInteropImportSourceGenerator.ImportStatePartialImportEnumReference;
     private const string ImportStateUnknownFailure
@@ -57,19 +61,42 @@ internal static class SourceGenerators
         using (sourceGen.UseCodeBlock(withSemicolon: true))
         {
             sourceGen.WriteLine($"{ExpectedMethodCountLocalName} => {ImportStateOk},");
-            sourceGen.WriteLine($"0 => {ImportStateDependencyNotPresent},");
+            sourceGen.WriteLine($"0 => {ImportStateFailedImport},");
             sourceGen.WriteLine($"_ => {ImportStatePartialImport}");
         }
         sourceGen.WriteLine($"{ImportsLoadedFieldName} = {ImportStateFieldName} == {ImportStateOk};");
         sourceGen.WriteLine();
 
-        sourceGen.Write($"if ({ImportStateFieldName} is {ImportStateOk}");
         if (!sourceGen.ImportMeta.RequiredDependency)
-            sourceGen.Write($" or {ImportStateDependencyNotPresent}");
-        sourceGen.WriteLine(")");
+        {
+            sourceGen.Write($"if ({ImportStateFieldName} is {ImportStateOk} or {ImportStateFailedImport})");
+            using (sourceGen.UseIndent())
+                sourceGen.WriteLine("return;");
+        }
+        else
+        {
+            sourceGen.Write($"if ({ImportStateFieldName} == {ImportStateOk})");
+            using (sourceGen.UseIndent())
+                sourceGen.WriteLine("return;");
 
-        using (sourceGen.UseIndent())
-            sourceGen.WriteLine("return;");
+            sourceGen.Write($"if ({ImportStateFieldName} == {ImportStateFailedImport})");
+            using (sourceGen.UseIndent())
+            {
+                sourceGen.WriteLine("throw new InvalidOperationException(");
+                using (sourceGen.UseIndent())
+                {
+                    sourceGen.WriteLine("$\"\"\"");
+                    sourceGen.WriteLine(
+                        $"Failed to import \"{sourceGen.ImportMeta.ImportName}\"; imported "
+                        + $"{{{ActualMethodCountLocalName}}} out of "
+                        + $"{{{ExpectedMethodCountLocalName}}} methods.");
+                    sourceGen.WriteLine(
+                        "Check that the dependency is present, the import name matches the export name, and that "
+                        + "the import methods' names and signatures match with the export methods.");
+                    sourceGen.WriteLine("\"\"\");");
+                }
+            }
+        }
 
         sourceGen.WriteLine();
 
@@ -110,8 +137,8 @@ internal static class SourceGenerators
         sourceGen.WriteLine(
             $"No suitable export method found for import method \"{sourceGen.ImportMeta.ImportName}.{method.Name}\".");
         sourceGen.WriteLine(
-            "Check if the dependency is enabled, and that the import name as well as import method name and signature "
-            + "match that of the export method.");
+            "Check that the dependency is present, the import name matches the export name, and that the "
+            + "import methods' names and signatures match with the export methods.");
         sourceGen.WriteLine(
             $"[failing method: {method.ToDisplayString(PartialMethodImplementationFormat)}]");
         sourceGen.WriteLine("\"\"\");");
@@ -150,7 +177,7 @@ internal static class SourceGenerators
         {
             GenerateImportInvocation(sourceGen, method);
             sourceGen.WriteLine();
-            GenerateDependencyNotPresentStateGuard(sourceGen, method);
+            GenerateFailedImportStateGuard(sourceGen, method);
             sourceGen.WriteLine();
             GenerateUnknownStateGuard(sourceGen, method);
             sourceGen.WriteLine();
@@ -181,12 +208,12 @@ internal static class SourceGenerators
         }
     }
 
-    private static void GenerateDependencyNotPresentStateGuard(
+    private static void GenerateFailedImportStateGuard(
         SimpleSourceGenerator sourceGen,
         IMethodSymbol method)
     {
         sourceGen.WriteLine(
-            $"if ({ImportStateFieldName} == {ImportStateDependencyNotPresent})");
+            $"if ({ImportStateFieldName} == {ImportStateFailedImport})");
         using var _ = sourceGen.UseIndent();
 
         sourceGen.WriteLine("throw new InvalidOperationException(");
@@ -195,12 +222,12 @@ internal static class SourceGenerators
         sourceGen.WriteLine("\"\"\"");
         sourceGen.WriteLine(
             $"Attempted to call import method \"{sourceGen.ImportMeta.ImportName}.{method.Name}\" "
-            + $"but the dependency is not present.");
+            + $"but the import was not successful.");
         sourceGen.WriteLine(
             $"Ensure that \"{sourceGen.ClassName}.{ImportsLoadedFieldName}\" is true before calling the import method.");
         sourceGen.WriteLine(
-            "If it is, check if the dependency is enabled, and that the import name as well as import method name "
-            + "and signature match that of the export method.");
+            "If it is, check that the dependency is present, the import name matches the export name, "
+            + "and that the import methods' names and signatures match with the export methods.");
         sourceGen.WriteLine("\"\"\");");
     }
 
