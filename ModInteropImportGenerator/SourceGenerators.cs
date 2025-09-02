@@ -88,11 +88,11 @@ internal static class SourceGenerators
                     sourceGen.WriteLine("$\"\"\"");
                     sourceGen.WriteLine(
                         $"Failed to import \"{sourceGen.ImportMeta.ImportName}\"; imported "
-                        + $"{{{ActualMethodCountLocalName}}} out of "
-                        + $"{{{ExpectedMethodCountLocalName}}} methods.");
+                        + $"{{{ActualMethodCountLocalName}}} out of {{{ExpectedMethodCountLocalName}}} methods.");
                     sourceGen.WriteLine(
-                        "Check that the dependency is present, the import name matches the export name, and that "
-                        + "the import methods' names and signatures match with the export methods.");
+                        "Check that the dependency is present, the import name matches the export name,");
+                    sourceGen.WriteLine(
+                        "and that the import methods' names and signatures match with the export methods.");
                     sourceGen.WriteLine("\"\"\");");
                 }
             }
@@ -136,11 +136,9 @@ internal static class SourceGenerators
         sourceGen.WriteLine("\"\"\"");
         sourceGen.WriteLine(
             $"No suitable export method found for import method \"{sourceGen.ImportMeta.ImportName}.{method.Name}\".");
-        sourceGen.WriteLine(
-            "Check that the dependency is present, the import name matches the export name, and that the "
-            + "import methods' names and signatures match with the export methods.");
-        sourceGen.WriteLine(
-            $"[failing method: {method.ToDisplayString(PartialMethodImplementationFormat)}]");
+        sourceGen.WriteLine("Check that the dependency is present, the import name matches the export name,");
+        sourceGen.WriteLine("and that the import methods' names and signatures match with the export methods.");
+        sourceGen.WriteLine($"[failing method: {method.ToDisplayString(PartialMethodImplementationFormat)}]");
         sourceGen.WriteLine("\"\"\");");
     }
 
@@ -224,9 +222,8 @@ internal static class SourceGenerators
             + $"but the import was not successful.");
         sourceGen.WriteLine(
             $"Ensure that \"{sourceGen.ClassName}.{ImportsLoadedFieldName}\" is true before calling the import method.");
-        sourceGen.WriteLine(
-            "If it is, check that the dependency is present, the import name matches the export name, "
-            + "and that the import methods' names and signatures match with the export methods.");
+        sourceGen.WriteLine("If it is, check that the dependency is present, the import name matches the export name,");
+        sourceGen.WriteLine("and that the import methods' names and signatures match with the export methods.");
         sourceGen.WriteLine("\"\"\");");
     }
 
