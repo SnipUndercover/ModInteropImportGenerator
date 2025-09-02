@@ -36,6 +36,7 @@
         <PackageReleaseNotes>
             - Deprecated `DependencyNotPresent` in favor of the new `ImportFailed` `ImportState` enum
             - Replaced the `UnreachableException` with `InvalidOperationException` if the import state is invalid
+            - Adjusted exception messages
         </PackageReleaseNotes>
 
         <PackageReadmeFile>README.md</PackageReadmeFile>
