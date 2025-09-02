@@ -24,7 +24,6 @@
     <!-- NuGet package stuff -->
     <PropertyGroup>
         <PackageId>ModInteropImportGenerator</PackageId>
-        <Version>1.0.0</Version>
         <Authors>SnipUndercover</Authors>
         <Product>ModInteropImportGenerator</Product>
         <Title>ModInterop Import Generator</Title>
@@ -32,6 +31,12 @@
         <RepositoryUrl>https://github.com/SnipUndercover/ModInteropImportGenerator/</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>MonoMod.ModInterop,ModInterop,source generator,sourcegen,roslyn,import,export,mod,modding</PackageTags>
+
+        <Version>1.1.0</Version>
+        <PackageReleaseNotes>
+            - Deprecated `DependencyNotPresent` in favor of the new `ImportFailed` `ImportState` enum
+            - Replaced the `UnreachableException` with `InvalidOperationException` if the import state is invalid
+        </PackageReleaseNotes>
 
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
