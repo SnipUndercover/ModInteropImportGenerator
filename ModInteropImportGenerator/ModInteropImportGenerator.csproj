@@ -32,12 +32,8 @@
         <RepositoryType>git</RepositoryType>
         <PackageTags>MonoMod.ModInterop,ModInterop,source generator,sourcegen,roslyn,import,export,mod,modding</PackageTags>
 
-        <Version>1.1.0</Version>
-        <PackageReleaseNotes>
-            - Deprecated DependencyNotPresent in favor of the new ImportFailed ImportState enum
-            - Replaced the UnreachableException with InvalidOperationException if the import state is invalid
-            - Adjusted exception messages
-        </PackageReleaseNotes>
+        <Version>1.1.1</Version>
+        <PackageReleaseNotes>https://github.com/SnipUndercover/ModInteropImportGenerator/blob/main/CHANGELOG.md</PackageReleaseNotes>
 
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
@@ -60,5 +56,11 @@
         <!-- Add a README and license -->
         <None Include="../README.md" Pack="true" PackagePath="\"/>
         <None Include="../LICENSE.txt" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="../CHANGELOG.md">
+            <Link>CHANGELOG.md</Link>
+        </Content>
     </ItemGroup>
 </Project>
