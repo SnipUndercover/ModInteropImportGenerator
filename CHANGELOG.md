@@ -1,4 +1,7 @@
-﻿## 1.1.1
+﻿## 1.1.2
+- Fix incorrect `MonoModImportGenerator` namespace in the README
+
+## 1.1.1
 - Fix duplicate `EmbeddedAttribute` definitions by making ours `partial`
 
 ## 1.1.0
