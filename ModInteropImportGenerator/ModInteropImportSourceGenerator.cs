@@ -63,12 +63,9 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
     [LanguageInjection("C#")]
     private const string EmbeddedAttributeDefinition =
         """
-        using System;
-
         namespace Microsoft.CodeAnalysis;
 
-        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface | AttributeTargets.Enum | AttributeTargets.Delegate)]
-        internal sealed class EmbeddedAttribute : Attribute;
+        internal sealed partial class EmbeddedAttribute : global::System.Attribute;
         """;
 
     internal const string ImportStateEnumTypeName = "ImportState";
