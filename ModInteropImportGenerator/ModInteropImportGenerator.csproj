@@ -4,7 +4,7 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <Nullable>enable</Nullable>
         <IsPackable>true</IsPackable>
-        <LangVersion>latest</LangVersion>
+        <LangVersion>13</LangVersion>
 
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <IsRoslynComponent>true</IsRoslynComponent>
