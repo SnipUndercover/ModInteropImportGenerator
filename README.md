@@ -135,7 +135,7 @@ the export name you're interested in.
 ```cs
 // DashStates.cs
 
-using MonoModImportGenerator;
+using ModInteropImportGenerator;
 
 [GenerateImports("CommunalHelper.DashStates")]
 public static partial class DashStates
@@ -150,7 +150,7 @@ as `partial` *(and of course add the semicolon at the end)*.
 ```cs
 // DashStates.cs
 
-using MonoModImportGenerator;
+using ModInteropImportGenerator;
 
 [GenerateImports("CommunalHelper.DashStates")]
 public static partial class DashStates
@@ -195,7 +195,7 @@ property to `true`. This will throw an exception directly in `Load()` if any met
 ```cs
 // DashStates.cs
 
-using MonoModImportGenerator;
+using ModInteropImportGenerator;
 
 [GenerateImports("CommunalHelper.DashStates", RequiredDependency = true)]
 public static partial class DashStates
