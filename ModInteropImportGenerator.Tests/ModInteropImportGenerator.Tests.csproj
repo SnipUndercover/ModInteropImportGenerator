@@ -21,6 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\ModInteropImportGenerator.CodeFix\ModInteropImportGenerator.CodeFix.csproj" />
         <ProjectReference Include="..\ModInteropImportGenerator\ModInteropImportGenerator.csproj"/>
     </ItemGroup>
 

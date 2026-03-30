@@ -114,6 +114,43 @@ public static partial class DashStates
 - You get parameter names as a bonus
 - You don't have to constantly slap an `?.Invoke(...)` on the imported methods if the dependency is optional
 
+If you are tooooo lazy to remove the method body and mark them as `partial`,
+we have also provided a code fixer.
+
+### Example
+Assume the previous mod export:
+
+```cs
+[ModExportName("CommunalHelper.DashStates")]
+public static class DashStates
+{
+    #region DreamTunnel
+
+    public static int GetDreamTunnelDashState()
+    {
+        return St.DreamTunnelDash;
+    }
+...
+```
+
+You replace it with `GenerateImports`,
+
+```cs
+[GenerateImports("CommunalHelper.DashStates")]
+public static class DashStates
+{
+    #region DreamTunnel
+
+    public static int GetDreamTunnelDashState()
+    {
+        return St.DreamTunnelDash;
+    }
+...
+```
+Your IDE should show a warning, and provide a lightbulb for this.
+
+Just accept it.
+
 ## Referencing
 
 Add the `ModInteropImportGenerator` NuGet package to your csproj like so:

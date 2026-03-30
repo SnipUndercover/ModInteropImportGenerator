@@ -20,7 +20,7 @@ public class ModInteropImportSourceGenerator : IIncrementalGenerator
 
     private const string GenerateImportsAttributeTypeName = "GenerateImportsAttribute";
 
-    private const string GenerateImportsAttributeFqn
+    internal const string GenerateImportsAttributeFqn
         = $"{ImportGeneratorNamespace}.{GenerateImportsAttributeTypeName}";
 
     [LanguageInjection("C#")]
