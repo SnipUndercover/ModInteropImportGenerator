@@ -1,4 +1,8 @@
-﻿## 1.1.2
+﻿## 1.1.3
+- Fix overloaded imports not working by including `[ModImportName]` in the generated import class fields
+  (issue [#3](https://github.com/SnipUndercover/ModInteropImportGenerator/issues/3))
+
+## 1.1.2
 - Fix incorrect `MonoModImportGenerator` namespace in the README
 
 ## 1.1.1
