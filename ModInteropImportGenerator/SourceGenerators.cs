@@ -127,6 +127,7 @@ internal static class SourceGenerators
         SimpleSourceGenerator sourceGen,
         IMethodSymbol method)
     {
+        string fieldImportName = method.GetFieldImportName(sourceGen);
         string importReference = method.GetGeneratedImportFieldReference();
 
         sourceGen.WriteLine($"if ({importReference} is null)");
@@ -137,7 +138,7 @@ internal static class SourceGenerators
 
         sourceGen.WriteLine("\"\"\"");
         sourceGen.WriteLine(
-            $"No suitable export method found for import method \"{sourceGen.ImportMeta.ImportName}.{method.Name}\".");
+            $"No suitable export method found for import method \"{fieldImportName}\".");
         sourceGen.WriteLine("Check that the dependency is present, the import name matches the export name,");
         sourceGen.WriteLine("and that the import methods' names and signatures match with the export methods.");
         sourceGen.WriteLine($"[failing method: {method.ToDisplayString(PartialMethodImplementationFormat)}]");
@@ -211,6 +212,8 @@ internal static class SourceGenerators
         SimpleSourceGenerator sourceGen,
         IMethodSymbol method)
     {
+        string fieldImportName = method.GetFieldImportName(sourceGen);
+
         sourceGen.WriteLine(
             $"if ({ImportStateFieldName} == {ImportStateFailedImport})");
         using var _ = sourceGen.UseIndent();
@@ -220,7 +223,7 @@ internal static class SourceGenerators
 
         sourceGen.WriteLine("\"\"\"");
         sourceGen.WriteLine(
-            $"Attempted to call import method \"{sourceGen.ImportMeta.ImportName}.{method.Name}\" "
+            $"Attempted to call import method \"{fieldImportName}\" "
             + $"but the import was not successful.");
         sourceGen.WriteLine(
             $"Ensure that \"{sourceGen.ClassName}.{ImportsLoadedFieldName}\" is true before calling the import method.");
@@ -233,6 +236,8 @@ internal static class SourceGenerators
         SimpleSourceGenerator sourceGen,
         IMethodSymbol method)
     {
+        string fieldImportName = method.GetFieldImportName(sourceGen);
+
         sourceGen.WriteLine($"if ({ImportStateFieldName} == {ImportStateNotImported})");
         using var _ = sourceGen.UseIndent();
 
@@ -241,7 +246,7 @@ internal static class SourceGenerators
 
         sourceGen.WriteLine("\"\"\"");
         sourceGen.WriteLine(
-            $"Attempted to call import \"{sourceGen.ImportMeta.ImportName}.{method.Name}\" before importing it.");
+            $"Attempted to call import \"{fieldImportName}\" before importing it.");
         sourceGen.WriteLine($"Ensure that \"{sourceGen.ClassName}.{LoadMethodName}()\" has been called first.");
         sourceGen.WriteLine("\"\"\");");
     }
@@ -250,12 +255,14 @@ internal static class SourceGenerators
         SimpleSourceGenerator sourceGen,
         IMethodSymbol method)
     {
+        string fieldImportName = method.GetFieldImportName(sourceGen);
+
         sourceGen.WriteLine("throw new InvalidOperationException(");
         using (sourceGen.UseIndent())
         {
             sourceGen.WriteLine("\"\"\"");
             sourceGen.WriteLine(
-                $"Attempted to call import \"{sourceGen.ImportMeta.ImportName}.{method.Name}\", "
+                $"Attempted to call import \"{fieldImportName}\", "
                 + $"but the import class is in an invalid state.");
             sourceGen.WriteLine($"Check the value of the \"{ImportStateFieldName}\" field for the cause.");
             sourceGen.WriteLine("\"\"\");");
@@ -307,9 +314,12 @@ internal static class SourceGenerators
         SimpleSourceGenerator sourceGen,
         IMethodSymbol method)
     {
+        string fieldImportName = method.GetFieldImportName(sourceGen);
         string delegateName = method.GetGeneratedImportDelegateName();
         string fieldName = method.GetGeneratedImportFieldName();
 
+        sourceGen.WriteLine($"[ModImportName(\"{fieldImportName}\")]");
         sourceGen.WriteLine($"public static {delegateName} {fieldName};");
     }
+
 }

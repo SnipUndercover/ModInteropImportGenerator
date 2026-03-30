@@ -55,4 +55,7 @@ internal static class MethodHelpers
 
     internal static IEnumerable<IParameterSymbol> GetOutParameters(this IMethodSymbol method)
         => method.Parameters.Where(static param => param.RefKind == RefKind.Out);
+
+    internal static string GetFieldImportName(this IMethodSymbol method, SimpleSourceGenerator sourceGen)
+        => $"{sourceGen.ImportMeta.ImportName}.{method.Name}";
 }
