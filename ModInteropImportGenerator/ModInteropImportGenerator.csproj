@@ -58,9 +58,10 @@
         <None Include="../LICENSE.txt" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
+    <!-- remember to put Pack="false" to exclude stuff from the NuGet package! -->
     <ItemGroup>
-        <Content Include="../CHANGELOG.md">
+        <None Include="../CHANGELOG.md" Pack="false">
             <Link>CHANGELOG.md</Link>
-        </Content>
+        </None>
     </ItemGroup>
 </Project>
